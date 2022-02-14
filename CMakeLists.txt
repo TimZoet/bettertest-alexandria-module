@@ -11,11 +11,13 @@ set(SRC_DIR "src")
 set(HEADERS
     ${INCLUDE_DIR}/alexandria_exporter.h
     ${INCLUDE_DIR}/alexandria_importer.h
+    ${INCLUDE_DIR}/library.h
 )
  
 set(SOURCES
     ${SRC_DIR}/alexandria_exporter.cpp
     ${SRC_DIR}/alexandria_importer.cpp
+    ${SRC_DIR}/library.cpp
 )
 
 set(DEPS_PUBLIC
