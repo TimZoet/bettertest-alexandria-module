@@ -8,15 +8,14 @@
 
 namespace btalex
 {
-    // TODO: Make all uint32_t size_t?
     struct Suite
     {
         alex::InstanceId id;
         std::string      name;
         std::string      dateCreated;
         std::string      dateLastRun;
-        uint32_t         passing;
-        uint32_t         runIndex;
+        uint64_t         passing  = 0;
+        uint64_t         runIndex = 0;
         std::string      version;
     };
 
@@ -27,14 +26,14 @@ namespace btalex
         std::string            name;
         std::string            dateCreated;
         std::string            dateLastRun;
-        uint32_t               passing;
+        uint64_t               passing = 0;
     };
 
     struct Location
     {
         std::string file;
-        uint32_t    line;
-        uint32_t    column;
+        uint64_t    line   = 0;
+        uint64_t    column = 0;
     };
 
     struct Result
@@ -47,10 +46,10 @@ namespace btalex
 
     struct Stats
     {
-        uint32_t total;
-        uint32_t successes;
-        uint32_t failures;
-        uint32_t exceptions;
+        uint64_t total      = 0;
+        uint64_t successes  = 0;
+        uint64_t failures   = 0;
+        uint64_t exceptions = 0;
     };
 
     struct Mixin
@@ -58,7 +57,7 @@ namespace btalex
         alex::InstanceId             id;
         alex::Reference<UnitTest>    unitTest;
         std::string                  name;
-        uint32_t                     runIndex;
+        uint64_t                     runIndex = 0;
         Stats                        stats;
         alex::ReferenceArray<Result> results;
     };
@@ -103,6 +102,4 @@ namespace btalex
                                                 alex::Member<&Mixin::results>>;
 
     alex::Library& getLibrary(const std::filesystem::path& file);
-
-
 }  // namespace btalex

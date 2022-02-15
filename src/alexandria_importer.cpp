@@ -24,24 +24,16 @@ namespace
         auto       query   = handler->find(colName == suite.getName());
         const auto suiteId = std::vector<alex::InstanceId>(query());
 
-        // TODO: More than 1 suites with same name, throw error?
-        if (suiteId.size() > 1) return nullptr;
+        if (suiteId.size() > 1) throw bt::ImportError("More than 1 suite with the same name found in the library.");
         if (suiteId.empty()) return nullptr;
         return handler->get(suiteId.front());
     }
 
-    std::shared_ptr<btalex::UnitTest>
-      getUnitTest(const btalex::UnitTestHandler& handler, const btalex::Suite& suite, const std::string& test)
+    std::vector<alex::InstanceId> getUnitTests(const btalex::Suite& suite, const btalex::UnitTestHandler& handler)
     {
-        auto       colId   = handler->getPrimitiveColumn<1>();
-        auto       colName = handler->getPrimitiveColumn<2>();
-        auto       query   = handler->find(colId == suite.id.get() && colName == test);
-        const auto testId  = std::vector<alex::InstanceId>(query());
-
-        // TODO: More than 1 tests with same name, throw error?
-        if (testId.size() > 1) { return nullptr; }
-        if (testId.empty()) return nullptr;
-        return handler->get(testId.front());
+        auto colId = handler->getPrimitiveColumn<1>();
+        auto query = handler->find(colId == suite.id.get());
+        return query();
     }
 }  // namespace
 
@@ -49,19 +41,20 @@ namespace bt
 {
     AlexandriaImporter::AlexandriaImporter(std::filesystem::path directory) : IImporter(std::move(directory)) {}
 
-    bool AlexandriaImporter::readSuiteFile(TestSuite& suite)
+    bool AlexandriaImporter::readSuite(TestSuite& suite)
     {
         if (!exists(path / "suite.db")) return false;
 
+        // Get library and object handlers.
         auto&      library         = btalex::getLibrary(path / "suite.db");
         const auto suiteHandler    = library.createObjectHandler<btalex::SuiteHandler>(library.getType("Suite"));
         const auto unitTestHandler = library.createObjectHandler<btalex::UnitTestHandler>(library.getType("UnitTest"));
-        const auto resultHandler   = library.createObjectHandler<btalex::ResultHandler>(library.getType("Result"));
-        const auto mixinHandler    = library.createObjectHandler<btalex::MixinHandler>(library.getType("Mixin"));
 
+        // Try to retrieve suite object with matching name.
         const auto suiteObj = getSuite(suite, suiteHandler);
-        if (!suiteObj) return true;
+        if (!suiteObj) return false;
 
+        // Retrieve suite information.
         suite.getData().name        = suiteObj->name;
         suite.getData().dateCreated = suiteObj->dateCreated;
         suite.getData().dateLastRun = suiteObj->dateLastRun;
@@ -69,17 +62,15 @@ namespace bt
         suite.getData().runIndex    = suiteObj->runIndex;
         suite.getData().version     = suiteObj->version;
 
-        auto colId = unitTestHandler->getPrimitiveColumn<1>();
-        auto query = unitTestHandler->find(colId == suiteObj->id.get());
-        for (const auto id : query())
+        // Retrieve all unit test information.
+        for (const auto id : getUnitTests(*suiteObj, unitTestHandler))
         {
-            auto testObj      = unitTestHandler->get(id);
-            auto test         = std::make_unique<TestData>();
-            test->name        = testObj->name;
-            test->dateCreated = testObj->dateCreated;
-            test->dateLastRun = testObj->dateLastRun;
-            test->passing     = testObj->passing > 0;
-            suite.getUnitTestSuite().getData().emplace_back(std::move(test));
+            const auto testObj = unitTestHandler->get(id);
+            auto&      test    = *suite.getUnitTestSuite().getData().emplace_back(std::make_unique<TestData>());
+            test.name          = testObj->name;
+            test.dateCreated   = testObj->dateCreated;
+            test.dateLastRun   = testObj->dateLastRun;
+            test.passing       = testObj->passing > 0;
         }
 
         return true;

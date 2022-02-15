@@ -27,6 +27,6 @@ namespace bt
 
         AlexandriaImporter& operator=(AlexandriaImporter&&) = delete;
 
-        bool readSuiteFile(TestSuite& suite) override;
+        bool readSuite(TestSuite& suite) override;
     };
 }  // namespace bt
