@@ -108,6 +108,8 @@ namespace bt
     void
       AlexandriaExporter::writeUnitTestResults(const TestSuite& suite, const IUnitTest& test, const std::string& name)
     {
+        // TODO: Implement thread-safe write methods.
+
         // Get library and object handlers.
         auto&      library         = btalex::getLibrary(path / "suite.db");
         const auto suiteHandler    = library.createObjectHandler<btalex::SuiteHandler>(library.getType("Suite"));
@@ -160,11 +162,4 @@ namespace bt
             mixinHandler->update(*mixinObj);
         }
     }
-
-    bool AlexandriaExporter::supportsMultithreading() const noexcept
-    {
-        // TODO: Implement thread-safe write methods.
-        return false;
-    }
-
 }  // namespace bt
