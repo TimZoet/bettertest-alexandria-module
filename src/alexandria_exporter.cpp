@@ -71,6 +71,8 @@ namespace bt
 
     void AlexandriaExporter::writeSuite(const TestSuite& suite)
     {
+        std::scoped_lock lock(mutex);
+
         // Create directory if it does not exist.
         if (!exists(path)) create_directories(path);
 
@@ -110,7 +112,7 @@ namespace bt
     void
       AlexandriaExporter::writeUnitTestResults(const TestSuite& suite, const IUnitTest& test, const std::string& name)
     {
-        // TODO: Implement thread-safe write methods.
+        std::scoped_lock lock(mutex);
 
         // Get library and object handlers.
         auto&      library         = btalex::getLibrary(path, "suite.db");
