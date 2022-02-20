@@ -8,6 +8,13 @@
 
 namespace btalex
 {
+    struct Version
+    {
+        uint32_t major = 0;
+        uint32_t minor = 0;
+        uint32_t patch = 0;
+    };
+
     struct Suite
     {
         alex::InstanceId id;
@@ -16,7 +23,7 @@ namespace btalex
         std::string      dateLastRun;
         uint64_t         passing  = 0;
         uint64_t         runIndex = 0;
-        std::string      version;
+        Version          version;
     };
 
     struct UnitTest
@@ -62,6 +69,9 @@ namespace btalex
         alex::ReferenceArray<Result> results;
     };
 
+    using version_t =
+      alex::MemberList<alex::Member<&Version::major>, alex::Member<&Version::minor>, alex::Member<&Version::patch>>;
+
     using location_t =
       alex::MemberList<alex::Member<&Location::file>, alex::Member<&Location::line>, alex::Member<&Location::column>>;
 
@@ -80,7 +90,7 @@ namespace btalex
                                                 alex::Member<&Suite::dateLastRun>,
                                                 alex::Member<&Suite::passing>,
                                                 alex::Member<&Suite::runIndex>,
-                                                alex::Member<&Suite::version>>;
+                                                alex::NestedMember<version_t, &Suite::version>>;
 
     using UnitTestHandler = alex::object_handler_t<alex::Member<&UnitTest::id>,
                                                    alex::Member<&UnitTest::suite>,
@@ -101,5 +111,5 @@ namespace btalex
                                                 alex::NestedMember<stats_t, &Mixin::stats>,
                                                 alex::Member<&Mixin::results>>;
 
-    alex::Library& getLibrary(const std::filesystem::path& file);
+    alex::Library& getLibrary(const std::filesystem::path& dir, const std::filesystem::path& file);
 }  // namespace btalex

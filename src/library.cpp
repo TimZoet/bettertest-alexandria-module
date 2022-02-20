@@ -7,24 +7,31 @@
 
 namespace btalex
 {
-    alex::Library& getLibrary(const std::filesystem::path& file)
+    alex::Library& getLibrary(const std::filesystem::path& dir, const std::filesystem::path& file)
     {
         static alex::LibraryPtr library;
 
+        if (!exists(dir)) create_directories(dir);
+
         if (!library)
         {
-            auto [l, created] = alex::Library::openOrCreate(file);
+            auto [l, created] = alex::Library::openOrCreate(dir / file);
             library           = std::move(l);
 
             if (created)
             {
+                auto& version = library->createType("Version");
+                version.createPrimitiveProperty("major", alex::DataType::Uint32);
+                version.createPrimitiveProperty("minor", alex::DataType::Uint32);
+                version.createPrimitiveProperty("patch", alex::DataType::Uint32);
+
                 auto& suite = library->createType("Suite");
                 suite.createStringProperty("name");
                 suite.createStringProperty("dateCreated");
                 suite.createStringProperty("dateLastRun");
                 suite.createPrimitiveProperty("passing", alex::DataType::Uint32);
                 suite.createPrimitiveProperty("runIndex", alex::DataType::Uint32);
-                suite.createStringProperty("version");
+                suite.createTypeProperty("version", version);
 
                 auto& unitTest = library->createType("UnitTest");
                 unitTest.createReferenceProperty("suite", suite);
@@ -66,4 +73,4 @@ namespace btalex
 
         return *library;
     }
-}  // namespace bt
+}  // namespace btalex

@@ -46,7 +46,7 @@ namespace bt
         if (!exists(path / "suite.db")) return false;
 
         // Get library and object handlers.
-        auto&      library         = btalex::getLibrary(path / "suite.db");
+        auto&      library         = btalex::getLibrary(path, "suite.db");
         const auto suiteHandler    = library.createObjectHandler<btalex::SuiteHandler>(library.getType("Suite"));
         const auto unitTestHandler = library.createObjectHandler<btalex::UnitTestHandler>(library.getType("UnitTest"));
 
@@ -55,12 +55,14 @@ namespace bt
         if (!suiteObj) return false;
 
         // Retrieve suite information.
-        suite.getData().name        = suiteObj->name;
-        suite.getData().dateCreated = suiteObj->dateCreated;
-        suite.getData().dateLastRun = suiteObj->dateLastRun;
-        suite.getData().passing     = suiteObj->passing > 0;
-        suite.getData().runIndex    = suiteObj->runIndex;
-        suite.getData().version     = suiteObj->version;
+        suite.getData().name          = suiteObj->name;
+        suite.getData().dateCreated   = suiteObj->dateCreated;
+        suite.getData().dateLastRun   = suiteObj->dateLastRun;
+        suite.getData().passing       = suiteObj->passing > 0;
+        suite.getData().runIndex      = suiteObj->runIndex;
+        suite.getData().version.major = suiteObj->version.major;
+        suite.getData().version.minor = suiteObj->version.minor;
+        suite.getData().version.patch = suiteObj->version.patch;
 
         // Retrieve all unit test information.
         for (const auto id : getUnitTests(*suiteObj, unitTestHandler))

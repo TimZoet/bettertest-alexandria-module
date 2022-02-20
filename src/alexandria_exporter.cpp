@@ -75,7 +75,7 @@ namespace bt
         if (!exists(path)) create_directories(path);
 
         // Get library and object handlers.
-        auto&      library         = btalex::getLibrary(path / "suite.db");
+        auto&      library         = btalex::getLibrary(path, "suite.db");
         const auto suiteHandler    = library.createObjectHandler<btalex::SuiteHandler>(library.getType("Suite"));
         const auto unitTestHandler = library.createObjectHandler<btalex::UnitTestHandler>(library.getType("UnitTest"));
 
@@ -83,12 +83,14 @@ namespace bt
         const auto suiteObj = getSuite(suite, suiteHandler);
 
         // Write suite data.
-        suiteObj->name        = suite.getName();
-        suiteObj->dateCreated = suite.getData().dateCreated;
-        suiteObj->dateLastRun = suite.getData().dateLastRun;
-        suiteObj->passing     = suite.getData().passing ? 1 : 0;
-        suiteObj->runIndex    = suite.getData().runIndex;
-        suiteObj->version     = suite.getData().version;
+        suiteObj->name          = suite.getName();
+        suiteObj->dateCreated   = suite.getData().dateCreated;
+        suiteObj->dateLastRun   = suite.getData().dateLastRun;
+        suiteObj->passing       = suite.getData().passing ? 1 : 0;
+        suiteObj->runIndex      = suite.getData().runIndex;
+        suiteObj->version.major = suite.getData().version.major;
+        suiteObj->version.minor = suite.getData().version.minor;
+        suiteObj->version.patch = suite.getData().version.patch;
         suiteHandler->update(*suiteObj);
 
         // Write unit test data.
@@ -111,7 +113,7 @@ namespace bt
         // TODO: Implement thread-safe write methods.
 
         // Get library and object handlers.
-        auto&      library         = btalex::getLibrary(path / "suite.db");
+        auto&      library         = btalex::getLibrary(path, "suite.db");
         const auto suiteHandler    = library.createObjectHandler<btalex::SuiteHandler>(library.getType("Suite"));
         const auto unitTestHandler = library.createObjectHandler<btalex::UnitTestHandler>(library.getType("UnitTest"));
         const auto resultHandler   = library.createObjectHandler<btalex::ResultHandler>(library.getType("Result"));
